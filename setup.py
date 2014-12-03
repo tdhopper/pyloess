@@ -6,11 +6,13 @@ __date__     = '$Date$'
 
 import os
 from os.path import join
+import glob
 
 def configuration(parent_package='',top_path=None):
     from numpy.distutils.misc_util import Configuration
     from numpy.distutils.system_info import get_info, dict_append
     confgr = Configuration('pyloess',parent_package,top_path)
+    
     # Configuration of LOWESS
     confgr.add_extension('_lowess',
                          sources=[join('src', 'f_lowess.pyf'),
@@ -25,11 +27,14 @@ def configuration(parent_package='',top_path=None):
     f_sources = ('loessf.f', 'linpack_lite.f')
     confgr.add_library('floess',
                        sources = [join('src',x) for x in f_sources])
-    blas_info = get_info('blas_opt')
+    # COnfiguration of BLAS
+    confgr.add_library('blas', sources=glob.glob("BLAS/*.f"))
+
+    #blas_info = get_info('blas_opt')
     build_info = {}
-    dict_append(build_info, libraries=["blas"])
-    dict_append(build_info, **blas_info)
-    dict_append(build_info, libraries=['floess'])
+    #dict_append(build_info, libraries=["blas"])
+    #dict_append(build_info, **blas_info)
+    dict_append(build_info, libraries=['floess', "blas"])
     c_sources = ['loess.c', 'loessc.c', 'misc.c', 'predict.c',]
     confgr.add_extension('_loess',
                          sources=[join('src','_loess.c')] + \
